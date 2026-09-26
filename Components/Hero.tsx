@@ -2,19 +2,18 @@
 
 import Image from "next/image";
 import {
+  AnimatePresence,
   motion,
   useScroll,
   useTransform,
-  AnimatePresence,
 } from "framer-motion";
 import {
   ArrowDown,
+  ArrowUpRight,
   Menu,
   X,
-  ArrowUpRight,
 } from "lucide-react";
-import { useRef, useEffect, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 
 const navigation = [
   { label: "Models", href: "#models" },
@@ -24,105 +23,93 @@ const navigation = [
 ];
 
 export default function Hero() {
-  const heroRef = useRef(null);
+  const heroRef = useRef<HTMLElement | null>(null);
 
   const [showStickyNav, setShowStickyNav] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  /* =========================================================
-     SCROLL + ACTIVE SECTION
-  ========================================================= */
-
-useEffect(() => {
-  let ticking = false;
-
-  const handleScroll = () => {
-    if (ticking) return;
-
-    ticking = true;
-
-    requestAnimationFrame(() => {
-      const scrollY = window.scrollY;
-
-      const shouldShow =
-        scrollY > window.innerHeight * 0.95;
-
-      setShowStickyNav((prev) =>
-        prev === shouldShow ? prev : shouldShow
-      );
-
-      const sections = navigation
-        .map((item) =>
-          document.querySelector(item.href)
-        )
-        .filter(Boolean);
-
-      let currentSection = "";
-
-      sections.forEach((section) => {
-        const rect =
-          section.getBoundingClientRect();
-
-        if (
-          rect.top <= window.innerHeight * 0.35 &&
-          rect.bottom >=
-            window.innerHeight * 0.35
-        ) {
-          currentSection = `#${section.id}`;
-        }
-      });
-
-      setActiveSection((prev) =>
-        prev === currentSection
-          ? prev
-          : currentSection
-      );
-
-      ticking = false;
-    });
-  };
-
-  handleScroll();
-
-  window.addEventListener(
-    "scroll",
-    handleScroll,
-    { passive: true }
-  );
-
-  return () =>
-    window.removeEventListener(
-      "scroll",
-      handleScroll
-    );
-}, []);
-
-
-      
-
-  /* =========================================================
-     LOCK BODY SCROLL WHEN MENU IS OPEN
-  ========================================================= */
+  /*
+   * ---------------------------------------------------------
+   * SCROLL STATE
+   * ---------------------------------------------------------
+   */
 
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (ticking) return;
+
+      ticking = true;
+
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+
+        const shouldShow = scrollY > window.innerHeight * 0.92;
+
+        setShowStickyNav((previous) =>
+          previous === shouldShow ? previous : shouldShow,
+        );
+
+        const sections = navigation
+          .map((item) => document.querySelector(item.href))
+          .filter((section): section is Element => Boolean(section));
+
+        let currentSection = "";
+
+        sections.forEach((section) => {
+          const rect = section.getBoundingClientRect();
+
+          if (
+            rect.top <= window.innerHeight * 0.38 &&
+            rect.bottom >= window.innerHeight * 0.38
+          ) {
+            currentSection = `#${section.id}`;
+          }
+        });
+
+        setActiveSection((previous) =>
+          previous === currentSection ? previous : currentSection,
+        );
+
+        ticking = false;
+      });
+    };
+
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  /*
+   * ---------------------------------------------------------
+   * MENU / BODY LOCK
+   * ---------------------------------------------------------
+   */
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
 
-  /* =========================================================
-     CLOSE MENU WITH ESCAPE
-  ========================================================= */
+  /*
+   * ---------------------------------------------------------
+   * ESCAPE KEY
+   * ---------------------------------------------------------
+   */
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMenuOpen(false);
       }
@@ -135,9 +122,11 @@ useEffect(() => {
     };
   }, []);
 
-  /* =========================================================
-     HERO PARALLAX
-  ========================================================= */
+  /*
+   * ---------------------------------------------------------
+   * HERO PARALLAX
+   * ---------------------------------------------------------
+   */
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -147,54 +136,62 @@ useEffect(() => {
   const imageY = useTransform(
     scrollYProgress,
     [0, 1],
-    ["0%", "12%"]
+    ["0%", "10%"],
   );
 
   const imageScale = useTransform(
     scrollYProgress,
     [0, 1],
-    [1, 1.02]
+    [1.015, 1.06],
   );
 
   const contentY = useTransform(
     scrollYProgress,
     [0, 1],
-    ["0%", "-8%"]
+    ["0%", "-10%"],
   );
 
   const contentOpacity = useTransform(
     scrollYProgress,
-    [0, 0.75],
-    [1, 0]
+    [0, 0.72],
+    [1, 0],
   );
 
-  /* =========================================================
-     MENU NAVIGATION
-  ========================================================= */
+  const navigationOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.45],
+    [1, 0],
+  );
 
-  const handleNavigation = (href) => {
+  /*
+   * ---------------------------------------------------------
+   * NAVIGATION
+   * ---------------------------------------------------------
+   */
+
+  const handleNavigation = (href: string) => {
     setMenuOpen(false);
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       const element = document.querySelector(href);
 
-      if (element) {
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
-    }, 100);
+      if (!element) return;
+
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
   };
 
   return (
     <section
       ref={heroRef}
       id="top"
-      className="relative min-h-[100svh] overflow-hidden bg-[#050505] text-white"
+      className="relative min-h-[100svh] overflow-hidden bg-[#090909] text-white"
     >
       {/* =====================================================
-          BACKGROUND IMAGE
+          HERO IMAGE
       ===================================================== */}
 
       <motion.div
@@ -202,38 +199,132 @@ useEffect(() => {
           y: imageY,
           scale: imageScale,
         }}
-        className="absolute inset-[-7%] will-change-transform transform-gpu"
+        className="absolute inset-[-5%] transform-gpu will-change-transform"
       >
         <Image
           src="/images/optimized/hero-porsche.webp"
-          alt="Porsche"
+          alt="Porsche sports car"
           fill
           priority
           sizes="100vw"
-          quality={80}
+          quality={85}
           className="object-cover object-center"
         />
       </motion.div>
 
       {/* =====================================================
-          CINEMATIC OVERLAYS
+          CINEMATIC IMAGE TREATMENT
       ===================================================== */}
 
-      <div className="absolute inset-0 bg-black/35" />
+      <div className="absolute inset-0 bg-black/20" />
 
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.78)_0%,rgba(0,0,0,0.54)_30%,rgba(0,0,0,0.28)_62%,rgba(0,0,0,0.38)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.72)_0%,rgba(0,0,0,0.40)_30%,rgba(0,0,0,0.10)_65%,rgba(0,0,0,0.20)_100%)]" />
 
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.52)_0%,rgba(0,0,0,0.08)_28%,rgba(0,0,0,0.05)_55%,rgba(0,0,0,0.86)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.48)_0%,rgba(0,0,0,0.03)_25%,rgba(0,0,0,0.04)_58%,rgba(0,0,0,0.82)_100%)]" />
+
+      {/* Very subtle grain */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.045] mix-blend-overlay [background-image:url('/images/optimized/1.webp')] [background-position:center] [background-size:cover]" />
 
       {/* =====================================================
-          3D PORSCHE MODEL
-
-          IMPORTANT:
-          The 3D model sits behind the text but above the
-          background image.
+          DESKTOP HERO NAVIGATION
       ===================================================== */}
 
-      
+      <motion.header
+        style={{ opacity: navigationOpacity }}
+        className="absolute inset-x-0 top-0 z-50 px-5 pt-5 sm:px-7 lg:px-10"
+      >
+        <nav className="mx-auto flex h-12 max-w-[1500px] items-center justify-between">
+          {/* BRAND */}
+
+          <a
+            href="#top"
+            aria-label="Porsche Universe home"
+            className="group flex items-center"
+          >
+            <Image
+              src="/images/porsche-crest.svg"
+              alt="Porsche"
+              width={48}
+              height={48}
+              className="h-10 w-10 object-contain transition-transform duration-500 group-hover:scale-[1.04] sm:h-11 sm:w-11"
+            />
+
+            <span className="ml-3 hidden text-[9px] font-medium tracking-[0.42em] text-white/85 sm:block">
+              PORSCHE
+            </span>
+          </a>
+
+          {/* DESKTOP LINKS */}
+
+          <div className="absolute left-1/2 hidden -translate-x-1/2 lg:block">
+            <div className="flex items-center gap-1">
+              {navigation.map((item) => {
+                const isActive = activeSection === item.href;
+
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className={`group relative px-4 py-2 text-[10px] uppercase tracking-[0.17em] transition-colors duration-300 ${
+                      isActive
+                        ? "text-white"
+                        : "text-white/55 hover:text-white"
+                    }`}
+                  >
+                    <span className="relative z-10">
+                      {item.label}
+                    </span>
+
+                    <span
+                      className={`absolute bottom-0 left-4 right-4 h-px origin-left bg-white transition-transform duration-300 ${
+                        isActive
+                          ? "scale-x-100"
+                          : "scale-x-0 group-hover:scale-x-100"
+                      }`}
+                    />
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* MENU */}
+
+          <button
+            type="button"
+            aria-label={
+              menuOpen
+                ? "Close navigation menu"
+                : "Open navigation menu"
+            }
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((previous) => !previous)}
+            className="flex h-10 w-10 items-center justify-center border border-white/20 bg-black/10 text-white/80 backdrop-blur-md transition-all duration-300 hover:border-white/40 hover:bg-white/10 hover:text-white"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {menuOpen ? (
+                <motion.span
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                >
+                  <X size={16} strokeWidth={1.25} />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="menu"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                >
+                  <Menu size={16} strokeWidth={1.25} />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </nav>
+      </motion.header>
 
       {/* =====================================================
           FULL SCREEN MENU
@@ -245,14 +336,13 @@ useEffect(() => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.35 }}
-            className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-xl"
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[200] bg-[#0b0b0b]"
           >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.08),transparent_45%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_25%,rgba(255,255,255,0.055),transparent_35%)]" />
 
-            <div className="relative flex min-h-screen flex-col px-6 py-6 sm:px-10">
-
-              {/* MENU HEADER */}
+            <div className="relative flex min-h-[100svh] flex-col px-6 py-6 sm:px-10 lg:px-14">
+              {/* MENU TOP */}
 
               <div className="flex items-center justify-between">
                 <a
@@ -263,12 +353,12 @@ useEffect(() => {
                   <Image
                     src="/images/porsche-crest.svg"
                     alt="Porsche"
-                    width={42}
-                    height={42}
+                    width={44}
+                    height={44}
                     className="h-10 w-10 object-contain"
                   />
 
-                  <span className="ml-3 text-[9px] tracking-[0.4em] text-white/80">
+                  <span className="ml-3 text-[9px] tracking-[0.42em] text-white/75">
                     PORSCHE
                   </span>
                 </a>
@@ -276,23 +366,10 @@ useEffect(() => {
                 <button
                   type="button"
                   aria-label="Close navigation menu"
-                  aria-expanded={menuOpen}
                   onClick={() => setMenuOpen(false)}
-                  className="
-                    flex h-11 w-11
-                    items-center justify-center
-                    rounded-full
-                    border border-white/[0.16]
-                    bg-white/[0.06]
-                    text-white/80
-                    backdrop-blur-xl
-                    transition-all
-                    duration-300
-                    hover:bg-white/[0.12]
-                    hover:text-white
-                  "
+                  className="flex h-10 w-10 items-center justify-center border border-white/15 text-white/70 transition-colors hover:border-white/35 hover:text-white"
                 >
-                  <X size={18} strokeWidth={1.2} />
+                  <X size={17} strokeWidth={1.25} />
                 </button>
               </div>
 
@@ -300,11 +377,16 @@ useEffect(() => {
 
               <div className="flex flex-1 items-center">
                 <div className="w-full">
-                  <p className="mb-8 text-[8px] uppercase tracking-[0.4em] text-white/30">
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="mb-8 text-[8px] uppercase tracking-[0.42em] text-white/30"
+                  >
                     Explore the universe
-                  </p>
+                  </motion.p>
 
-                  <nav className="flex flex-col">
+                  <nav>
                     {navigation.map((item, index) => {
                       const isActive =
                         activeSection === item.href;
@@ -315,7 +397,7 @@ useEffect(() => {
                           type="button"
                           initial={{
                             opacity: 0,
-                            x: -30,
+                            x: -25,
                           }}
                           animate={{
                             opacity: 1,
@@ -329,26 +411,19 @@ useEffect(() => {
                           onClick={() =>
                             handleNavigation(item.href)
                           }
-                          className="group flex items-center justify-between border-b border-white/[0.08] py-5 text-left"
+                          className="group flex w-full items-center justify-between border-b border-white/[0.10] py-5 text-left sm:py-6"
                         >
-                          <div className="flex items-center gap-5">
+                          <div className="flex items-center gap-5 sm:gap-8">
                             <span className="text-[8px] tracking-[0.25em] text-white/20">
                               0{index + 1}
                             </span>
 
                             <span
-                              className={`
-                                text-[clamp(2rem,8vw,4rem)]
-                                font-light
-                                tracking-[-0.05em]
-                                transition-colors
-                                duration-300
-                                ${
-                                  isActive
-                                    ? "text-white"
-                                    : "text-white/55 group-hover:text-white"
-                                }
-                              `}
+                              className={`text-[clamp(2rem,7vw,5.5rem)] font-light leading-none tracking-[-0.055em] transition-colors duration-300 ${
+                                isActive
+                                  ? "text-white"
+                                  : "text-white/45 group-hover:text-white"
+                              }`}
                             >
                               {item.label}
                             </span>
@@ -357,14 +432,7 @@ useEffect(() => {
                           <ArrowUpRight
                             size={20}
                             strokeWidth={1}
-                            className="
-                              text-white/20
-                              transition-all
-                              duration-300
-                              group-hover:translate-x-1
-                              group-hover:-translate-y-1
-                              group-hover:text-white
-                            "
+                            className="text-white/20 transition-all duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white"
                           />
                         </motion.button>
                       );
@@ -375,12 +443,12 @@ useEffect(() => {
 
               {/* MENU FOOTER */}
 
-              <div className="flex items-center justify-between border-t border-white/[0.08] pt-5">
-                <span className="text-[7px] uppercase tracking-[0.3em] text-white/25">
+              <div className="flex items-center justify-between border-t border-white/[0.10] pt-5">
+                <span className="text-[7px] uppercase tracking-[0.35em] text-white/25">
                   Stuttgart
                 </span>
 
-                <span className="text-[7px] uppercase tracking-[0.3em] text-white/25">
+                <span className="text-[7px] uppercase tracking-[0.35em] text-white/25">
                   Since 1948
                 </span>
               </div>
@@ -390,55 +458,37 @@ useEffect(() => {
       </AnimatePresence>
 
       {/* =====================================================
-          STICKY GLASS NAV
+          STICKY NAVIGATION
       ===================================================== */}
 
-  <motion.div
-  initial={false}
-  animate={showStickyNav ? "visible" : "hidden"}
-  className={`fixed inset-x-0 top-4 z-[100] ${
-    showStickyNav
-      ? "pointer-events-auto"
-      : "pointer-events-none"
-  }`}
-  variants={{
-    visible: {
-      opacity: 1,
-      y: 0,
-    },
-    hidden: {
-      opacity: 0,
-      y: -20,
-    },
-  }}
-  transition={{
-    duration: 0.3,
-  }}
->
-        <div className="mx-auto flex max-w-[1480px] justify-center px-4">
-          <div
-            className="
-              flex items-center gap-1
-              rounded-full
-              border border-white/[0.12]
-              bg-black/[0.42]
-              px-2 py-2
-              shadow-[0_12px_50px_rgba(0,0,0,0.45)]
-              backdrop-blur-2xl
-              backdrop-saturate-150
-            "
-          >
+      <motion.div
+        initial={false}
+        animate={showStickyNav ? "visible" : "hidden"}
+        className={`fixed inset-x-0 top-4 z-[100] ${
+          showStickyNav
+            ? "pointer-events-auto"
+            : "pointer-events-none"
+        }`}
+        variants={{
+          visible: {
+            opacity: 1,
+            y: 0,
+          },
+          hidden: {
+            opacity: 0,
+            y: -18,
+          },
+        }}
+        transition={{
+          duration: 0.3,
+        }}
+      >
+        <div className="mx-auto flex max-w-[1500px] justify-center px-4">
+          <div className="flex items-center border border-white/15 bg-black/65 px-2 py-2 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl">
             <a
               href="#top"
               aria-label="Porsche Universe home"
-              className="
-                mr-2
-                flex h-8 w-8
-                items-center justify-center
-                rounded-full
-                transition-opacity
-                hover:opacity-80
-              "
+              className="mr-2 flex h-8 w-8 items-center justify-center"
             >
               <Image
                 src="/images/porsche-crest.svg"
@@ -449,53 +499,34 @@ useEffect(() => {
               />
             </a>
 
-            {navigation.map((item) => {
-              const isActive =
-                activeSection === item.href;
+            <div className="hidden items-center sm:flex">
+              {navigation.map((item) => {
+                const isActive =
+                  activeSection === item.href;
 
-              return (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className={`
-                    relative
-                    rounded-full
-                    px-4 py-2
-                    text-[9px]
-                    uppercase
-                    tracking-[0.16em]
-                    transition-all
-                    duration-300
-                    ${
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className={`relative px-4 py-2 text-[9px] uppercase tracking-[0.16em] transition-colors duration-300 ${
                       isActive
                         ? "text-white"
-                        : "text-white/55 hover:text-white"
-                    }
-                  `}
-                >
-                  {isActive && (
-                    <motion.span
-                      layoutId="activeNav"
-                      className="
-                        absolute
-                        inset-0
-                        -z-10
-                        rounded-full
-                        border
-                        border-white/[0.16]
-                        bg-white/[0.07]
-                        shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_4px_18px_rgba(0,0,0,0.18)]
-                        backdrop-blur-md
-                      "
-                    />
-                  )}
-
-                  <span className="relative z-10">
+                        : "text-white/50 hover:text-white"
+                    }`}
+                  >
                     {item.label}
-                  </span>
-                </a>
-              );
-            })}
+
+                    <span
+                      className={`absolute bottom-0 left-4 right-4 h-px bg-white transition-transform duration-300 ${
+                        isActive
+                          ? "scale-x-100"
+                          : "scale-x-0"
+                      }`}
+                    />
+                  </a>
+                );
+              })}
+            </div>
 
             <button
               type="button"
@@ -508,20 +539,7 @@ useEffect(() => {
               onClick={() =>
                 setMenuOpen((previous) => !previous)
               }
-              className="
-                ml-1
-                flex h-8 w-8
-                items-center justify-center
-                rounded-full
-                border border-white/[0.14]
-                bg-white/[0.055]
-                text-white/70
-                transition-all
-                duration-300
-                hover:border-white/30
-                hover:bg-white/[0.12]
-                hover:text-white
-              "
+              className="ml-1 flex h-8 w-8 items-center justify-center border border-white/15 bg-white/5 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
             >
               {menuOpen ? (
                 <X size={14} strokeWidth={1.2} />
@@ -534,178 +552,6 @@ useEffect(() => {
       </motion.div>
 
       {/* =====================================================
-          MAIN NAVIGATION
-      ===================================================== */}
-
-      <header className="absolute inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 sm:pt-5 lg:px-8">
-        <nav className="mx-auto flex h-[58px] max-w-[1480px] items-center justify-between">
-
-          <a
-            href="#top"
-            aria-label="Porsche Universe home"
-            className="group flex shrink-0 items-center"
-          >
-            <Image
-              src="/images/porsche-crest.svg"
-              alt="Porsche"
-              width={44}
-              height={44}
-              className="h-10 w-10 object-contain opacity-95 transition-transform duration-500 group-hover:scale-105 sm:h-11 sm:w-11"
-            />
-
-            <span className="ml-3 hidden text-[10px] font-medium tracking-[0.38em] text-white sm:block">
-              PORSCHE
-            </span>
-          </a>
-
-          <div className="absolute left-1/2 hidden -translate-x-1/2 lg:block">
-            <div
-              className="
-                flex items-center gap-0.5
-                rounded-full
-                border border-white/[0.14]
-                bg-black/[0.20]
-                px-1 py-1
-                shadow-[0_8px_30px_rgba(0,0,0,0.18)]
-                backdrop-blur-xl
-              "
-            >
-              {navigation.map((item) => {
-                const isActive =
-                  activeSection === item.href;
-
-                return (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    className={`
-                      relative
-                      rounded-full
-                      px-3 py-1.5
-                      text-[12px]
-                      font-normal
-                      uppercase
-                      leading-none
-                      tracking-[0.14em]
-                      transition-all
-                      duration-300
-                      xl:px-4
-                      ${
-                        isActive
-                          ? "text-white"
-                          : "text-white/60 hover:text-white"
-                      }
-                    `}
-                  >
-                    {isActive && (
-                      <motion.span
-                        layoutId="heroActiveNav"
-                        className="
-                          absolute
-                          inset-0
-                          -z-10
-                          rounded-full
-                          border
-                          border-white/[0.14]
-                          bg-white/[0.075]
-                          shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]
-                          backdrop-blur-md
-                        "
-                      />
-                    )}
-
-                    <span className="relative z-10">
-                      {item.label}
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="ml-auto flex items-center">
-            <button
-              type="button"
-              aria-label={
-                menuOpen
-                  ? "Close navigation menu"
-                  : "Open navigation menu"
-              }
-              aria-expanded={menuOpen}
-              onClick={() =>
-                setMenuOpen((previous) => !previous)
-              }
-              className="
-                flex h-9 w-9
-                items-center justify-center
-                rounded-full
-                border border-white/[0.18]
-                bg-white/[0.055]
-                text-white/80
-                shadow-[0_6px_24px_rgba(0,0,0,0.16)]
-                backdrop-blur-xl
-                transition-all
-                duration-300
-                hover:border-white/30
-                hover:bg-white/[0.12]
-                hover:text-white
-                sm:h-10 sm:w-10
-              "
-            >
-              <AnimatePresence
-                mode="wait"
-                initial={false}
-              >
-                {menuOpen ? (
-                  <motion.span
-                    key="close"
-                    initial={{
-                      rotate: -90,
-                      opacity: 0,
-                    }}
-                    animate={{
-                      rotate: 0,
-                      opacity: 1,
-                    }}
-                    exit={{
-                      rotate: 90,
-                      opacity: 0,
-                    }}
-                  >
-                    <X
-                      size={15}
-                      strokeWidth={1.2}
-                    />
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="menu"
-                    initial={{
-                      rotate: 90,
-                      opacity: 0,
-                    }}
-                    animate={{
-                      rotate: 0,
-                      opacity: 1,
-                    }}
-                    exit={{
-                      rotate: -90,
-                      opacity: 0,
-                    }}
-                  >
-                    <Menu
-                      size={15}
-                      strokeWidth={1.2}
-                    />
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
-          </div>
-        </nav>
-      </header>
-
-      {/* =====================================================
           HERO CONTENT
       ===================================================== */}
 
@@ -716,10 +562,11 @@ useEffect(() => {
         }}
         className="relative z-20 flex min-h-[100svh] items-end"
       >
-        <div className="mx-auto w-full max-w-[1480px] px-5 pb-7 sm:px-8 sm:pb-9 lg:px-10 lg:pb-11">
-          <div className="max-w-[720px]">
+        <div className="mx-auto w-full max-w-[1500px] px-5 pb-7 sm:px-8 sm:pb-9 lg:px-10 lg:pb-11">
+          <div className="max-w-[760px]">
+            {/* EYEBROW */}
 
-            <motion.p
+            <motion.div
               initial={{
                 opacity: 0,
                 y: 12,
@@ -732,10 +579,16 @@ useEffect(() => {
                 duration: 0.7,
                 delay: 0.15,
               }}
-              className="mb-5 text-[8px] font-medium uppercase tracking-[0.32em] text-white/55 sm:mb-6"
+              className="mb-5 flex items-center gap-3 sm:mb-6"
             >
-              The Porsche Universe
-            </motion.p>
+              <span className="h-px w-7 bg-[#c41230]" />
+
+              <span className="text-[8px] font-medium uppercase tracking-[0.35em] text-white/65">
+                The Porsche Universe
+              </span>
+            </motion.div>
+
+            {/* MAIN TITLE */}
 
             <motion.h1
               initial={{
@@ -751,10 +604,12 @@ useEffect(() => {
                 delay: 0.25,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="font-light leading-[0.88] tracking-[-0.065em] text-white text-[18vw] sm:text-[13vw] md:text-[11vw] lg:text-[8.5vw]"
+              className="text-[17vw] font-light leading-[0.82] tracking-[-0.075em] text-white sm:text-[13vw] md:text-[10vw] lg:text-[8.2vw]"
             >
               PORSCHE
             </motion.h1>
+
+            {/* DESCRIPTION */}
 
             <motion.div
               initial={{
@@ -770,17 +625,23 @@ useEffect(() => {
                 delay: 0.55,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="mt-6 sm:mt-7"
+              className="mt-6 flex max-w-[560px] items-start justify-between gap-8 sm:mt-7"
             >
-              <p className="max-w-[360px] text-[10px] leading-[1.8] text-white/60 sm:text-[11px]">
+              <p className="max-w-[390px] text-[10px] leading-[1.85] text-white/58 sm:text-[11px]">
                 A universe shaped by performance, design and
                 engineering. Discover the machines, stories and
                 experiences that define Porsche.
               </p>
+
+              <span className="hidden pt-1 text-[8px] uppercase tracking-[0.3em] text-white/30 sm:block">
+                1948 — 2026
+              </span>
             </motion.div>
           </div>
 
-          {/* BOTTOM INFORMATION */}
+          {/* =================================================
+              HERO FOOTER
+          ================================================= */}
 
           <motion.div
             initial={{
@@ -793,16 +654,16 @@ useEffect(() => {
               duration: 0.8,
               delay: 0.9,
             }}
-            className="mt-10 flex items-center justify-between border-t border-white/[0.14] pt-4 sm:mt-12 sm:pt-5"
+            className="mt-10 flex items-end justify-between border-t border-white/[0.16] pt-4 sm:mt-12 sm:pt-5"
           >
             <div className="flex items-center gap-4 sm:gap-5">
-              <span className="text-[7px] uppercase tracking-[0.28em] text-white/40 sm:text-[8px]">
+              <span className="text-[7px] uppercase tracking-[0.3em] text-white/42 sm:text-[8px]">
                 Stuttgart
               </span>
 
               <span className="h-px w-6 bg-white/20 sm:w-8" />
 
-              <span className="text-[7px] uppercase tracking-[0.28em] text-white/40 sm:text-[8px]">
+              <span className="text-[7px] uppercase tracking-[0.3em] text-white/42 sm:text-[8px]">
                 Since 1948
               </span>
             </div>
@@ -810,25 +671,27 @@ useEffect(() => {
             <button
               type="button"
               onClick={() => handleNavigation("#models")}
-              className="group flex items-center gap-2 text-[7px] uppercase tracking-[0.28em] text-white/45 transition-colors duration-300 hover:text-white sm:text-[8px]"
+              className="group flex items-center gap-3 text-[7px] uppercase tracking-[0.3em] text-white/50 transition-colors duration-300 hover:text-white sm:text-[8px]"
             >
-              Scroll
+              <span>Explore</span>
 
-              <ArrowDown
-                size={11}
-                strokeWidth={1}
-                className="transition-transform duration-500 group-hover:translate-y-1"
-              />
+              <span className="flex h-7 w-7 items-center justify-center border border-white/20 transition-all duration-300 group-hover:border-white/50">
+                <ArrowDown
+                  size={11}
+                  strokeWidth={1}
+                  className="transition-transform duration-500 group-hover:translate-y-1"
+                />
+              </span>
             </button>
           </motion.div>
         </div>
       </motion.div>
 
       {/* =====================================================
-          BOTTOM ATMOSPHERE
+          BOTTOM FADE
       ===================================================== */}
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/35 to-transparent" />
     </section>
   );
 }

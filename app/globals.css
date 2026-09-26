@@ -22,6 +22,7 @@ html {
 body {
   margin: 0;
   padding: 0;
+  min-width: 320px;
   background: var(--background);
   color: var(--foreground);
   font-family:
@@ -36,12 +37,18 @@ body {
   overflow-x: hidden;
 }
 
+body,
 button,
 a,
 input,
 textarea,
 select {
-  font: inherit;
+  font-family:
+    "Porsche Next",
+    "Helvetica Neue",
+    Arial,
+    Helvetica,
+    sans-serif;
 }
 
 button {
@@ -72,8 +79,12 @@ canvas {
   color: #ffffff;
 }
 
+/* ---------------------------------------------------------
+   SCROLLBAR
+--------------------------------------------------------- */
+
 body::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 body::-webkit-scrollbar-track {
@@ -81,13 +92,16 @@ body::-webkit-scrollbar-track {
 }
 
 body::-webkit-scrollbar-thumb {
-  background: rgba(23, 23, 23, 0.2);
-  border-radius: 999px;
+  background: rgba(23, 23, 23, 0.22);
 }
 
 body::-webkit-scrollbar-thumb:hover {
-  background: rgba(23, 23, 23, 0.35);
+  background: rgba(23, 23, 23, 0.38);
 }
+
+/* ---------------------------------------------------------
+   PAGE TRANSITIONS / MOTION HELPERS
+--------------------------------------------------------- */
 
 @keyframes scrollLine {
   0% {
@@ -112,6 +126,25 @@ body::-webkit-scrollbar-thumb:hover {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ---------------------------------------------------------
+   ACCESSIBILITY
+--------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import { useRef } from "react";
 
 type PorscheModel = {
   number: string;
@@ -71,75 +72,102 @@ function ModelCard({
   model: PorscheModel;
   large?: boolean;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+
+  const imageY = useTransform(scrollYProgress, [0, 1], [18, -18]);
+
   const slug = model.name.toLowerCase();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
+    <motion.article
+      ref={ref}
+      initial={{
+        opacity: 0,
+        y: 36,
+      }}
+      whileInView={{
+        opacity: 1,
+        y: 0,
+      }}
       viewport={{
         once: true,
         margin: "-100px",
       }}
       transition={{
-        duration: 0.85,
+        duration: 0.9,
         ease: [0.16, 1, 0.3, 1],
       }}
     >
       <Link
         href={`/models/${slug}`}
-        className="group relative block"
+        className="group block"
         aria-label={`Explore Porsche ${model.name}`}
       >
         <div
-          className={`relative overflow-hidden rounded-[18px] bg-[#111] ${
+          className={`relative overflow-hidden bg-[#121212] ${
             large
-              ? "aspect-[1.45/1] md:aspect-[1.55/1]"
+              ? "aspect-[1.5/1] md:aspect-[1.58/1]"
               : "aspect-[1.35/1]"
           }`}
         >
-          <Image
-            src={model.image}
-            alt={`Porsche ${model.name}`}
-            fill
-            loading="lazy"
-            sizes={
-              large
-                ? "(max-width: 768px) 100vw, 65vw"
-                : "(max-width: 768px) 100vw, 35vw"
-            }
-            quality={75}
-            className="object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.045]"
-          />
+          <motion.div
+            style={{
+              y: imageY,
+              scale: 1.08,
+            }}
+            className="absolute -inset-x-0 -inset-y-5"
+          >
+            <Image
+              src={model.image}
+              alt={`Porsche ${model.name}`}
+              fill
+              loading="lazy"
+              sizes={
+                large
+                  ? "(max-width: 768px) 100vw, 66vw"
+                  : "(max-width: 768px) 100vw, 38vw"
+              }
+              quality={78}
+              className="object-cover transition-transform duration-[1600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.045]"
+            />
+          </motion.div>
 
-          {/* Subtle cinematic depth */}
-          <div className="absolute inset-0 bg-black/[0.06] transition-colors duration-700 group-hover:bg-black/[0.02]" />
+          {/* Cinematic image treatment */}
+          <div className="absolute inset-0 bg-black/[0.08] transition-opacity duration-700 group-hover:opacity-40" />
 
-          {/* Bottom contrast */}
-          <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-          {/* Top information */}
-          <div className="absolute inset-x-0 top-0 flex items-center justify-between p-5 sm:p-6">
-            <span className="text-[8px] tracking-[0.28em] text-white/60">
+          {/* Top metadata */}
+          <div className="absolute inset-x-0 top-0 flex items-start justify-between p-5 sm:p-6">
+            <span className="text-[8px] tracking-[0.3em] text-white/60">
               {model.number}
             </span>
 
-            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/10 text-white/70 backdrop-blur-md transition-all duration-500 group-hover:border-white/50 group-hover:bg-white group-hover:text-black">
-              <ArrowUpRight size={13} strokeWidth={1.2} />
+            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/10 text-white/75 backdrop-blur-sm transition-all duration-500 group-hover:border-white/70 group-hover:bg-white group-hover:text-black">
+              <ArrowUpRight
+                size={14}
+                strokeWidth={1.15}
+                className="transition-transform duration-500 group-hover:translate-x-[1px] group-hover:-translate-y-[1px]"
+              />
             </span>
           </div>
 
-          {/* Model information */}
-          <div className="absolute bottom-0 left-0 p-5 sm:p-7">
-            <p className="mb-2 text-[7px] uppercase tracking-[0.34em] text-white/55">
+          {/* Model title */}
+          <div className="absolute bottom-0 left-0 p-5 sm:p-7 lg:p-8">
+            <p className="mb-2 text-[7px] uppercase tracking-[0.35em] text-white/55">
               {model.family}
             </p>
 
             <h3
-              className={`font-light leading-none tracking-[-0.06em] text-white ${
+              className={`font-light leading-[0.85] tracking-[-0.065em] text-white ${
                 large
-                  ? "text-[clamp(3rem,5vw,5.5rem)]"
-                  : "text-[clamp(2.5rem,4vw,4rem)]"
+                  ? "text-[clamp(3.5rem,6vw,6.5rem)]"
+                  : "text-[clamp(2.8rem,4.5vw,4.5rem)]"
               }`}
             >
               {model.name}
@@ -147,18 +175,18 @@ function ModelCard({
           </div>
         </div>
 
-        {/* Information underneath */}
-        <div className="flex items-start justify-between gap-6 px-1 pt-4">
-          <p className="max-w-[360px] text-[9px] leading-[1.7] text-white/35 sm:text-[10px]">
+        {/* Editorial information */}
+        <div className="flex items-start justify-between gap-8 border-t border-white/[0.09] px-0.5 pt-4">
+          <p className="max-w-[370px] text-[9px] leading-[1.75] text-white/38 sm:text-[10px]">
             {model.description}
           </p>
 
-          <span className="hidden pt-0.5 text-[7px] uppercase tracking-[0.28em] text-white/20 transition-colors duration-500 group-hover:text-white/55 sm:block">
+          <span className="hidden shrink-0 pt-0.5 text-[7px] uppercase tracking-[0.3em] text-white/20 transition-colors duration-500 group-hover:text-white/65 sm:block">
             Discover
           </span>
         </div>
       </Link>
-    </motion.div>
+    </motion.article>
   );
 }
 
@@ -168,13 +196,13 @@ export default function Collection() {
       id="models"
       className="relative overflow-hidden bg-[#08090a] px-5 py-32 text-white sm:px-8 sm:py-40 lg:px-12 lg:py-48"
     >
-      <div className="mx-auto max-w-[1400px]">
-        {/* SECTION INTRO */}
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end lg:gap-24">
+      <div className="mx-auto max-w-[1440px]">
+        {/* INTRODUCTION */}
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_350px] lg:items-end lg:gap-24">
           <motion.div
             initial={{
               opacity: 0,
-              y: 25,
+              y: 28,
             }}
             whileInView={{
               opacity: 1,
@@ -182,17 +210,18 @@ export default function Collection() {
             }}
             viewport={{
               once: true,
+              margin: "-80px",
             }}
             transition={{
-              duration: 0.9,
+              duration: 1,
               ease: [0.16, 1, 0.3, 1],
             }}
           >
-            <p className="mb-4 text-[8px] uppercase tracking-[0.38em] text-white/35">
+            <p className="mb-5 text-[8px] uppercase tracking-[0.4em] text-white/35">
               The Porsche Universe
             </p>
 
-            <h2 className="text-[clamp(3rem,6.5vw,6.5rem)] font-light leading-[0.82] tracking-[-0.075em]">
+            <h2 className="max-w-[900px] text-[clamp(3.4rem,7.5vw,8rem)] font-light leading-[0.78] tracking-[-0.085em]">
               THE
               <br />
               UNIVERSE.
@@ -202,7 +231,7 @@ export default function Collection() {
           <motion.div
             initial={{
               opacity: 0,
-              y: 20,
+              y: 22,
             }}
             whileInView={{
               opacity: 1,
@@ -210,56 +239,57 @@ export default function Collection() {
             }}
             viewport={{
               once: true,
+              margin: "-80px",
             }}
             transition={{
-              duration: 0.8,
-              delay: 0.15,
+              duration: 0.9,
+              delay: 0.12,
+              ease: [0.16, 1, 0.3, 1],
             }}
-            className="pb-1"
           >
-            <p className="max-w-[290px] text-[10px] leading-[1.8] text-white/40 sm:text-[11px]">
+            <p className="max-w-[300px] text-[10px] leading-[1.85] text-white/42 sm:text-[11px]">
               Six expressions of one philosophy. Explore the Porsche world
               through sports cars, electric performance, luxury touring and
               SUVs.
             </p>
 
-            <div className="mt-7 flex items-center gap-4">
-              <span className="text-[7px] uppercase tracking-[0.32em] text-white/25">
+            <div className="mt-8 flex items-center gap-4">
+              <span className="text-[7px] uppercase tracking-[0.34em] text-white/25">
                 06 families
               </span>
 
               <span className="h-px w-8 bg-white/15" />
 
-              <span className="text-[7px] uppercase tracking-[0.32em] text-white/25">
+              <span className="text-[7px] uppercase tracking-[0.34em] text-white/25">
                 Stuttgart
               </span>
             </div>
           </motion.div>
         </div>
 
-        {/* UNIVERSE GRID */}
-        <div className="mt-16 space-y-20 sm:mt-20 sm:space-y-24 lg:mt-24 lg:space-y-28">
-          {/* Row 01 */}
-          <div className="grid gap-14 md:grid-cols-[1.45fr_0.85fr] md:items-end md:gap-10 lg:gap-20">
+        {/* MODEL COLLECTION */}
+        <div className="mt-20 space-y-24 sm:mt-24 sm:space-y-32 lg:mt-32 lg:space-y-40">
+          {/* 911 / 718 */}
+          <div className="grid gap-16 md:grid-cols-[1.5fr_0.82fr] md:items-end md:gap-10 lg:gap-24">
             <ModelCard model={models[0]} large />
 
-            <div className="md:pb-8">
+            <div className="md:pb-12">
               <ModelCard model={models[1]} />
             </div>
           </div>
 
-          {/* Row 02 */}
-          <div className="grid gap-14 md:grid-cols-2 md:gap-10 lg:gap-20">
-            <div className="md:pt-20">
+          {/* Taycan / Panamera */}
+          <div className="grid gap-16 md:grid-cols-2 md:gap-12 lg:gap-24">
+            <div className="md:pt-24">
               <ModelCard model={models[2]} />
             </div>
 
             <ModelCard model={models[3]} />
           </div>
 
-          {/* Row 03 */}
-          <div className="grid gap-14 md:grid-cols-[0.85fr_1.45fr] md:items-start md:gap-10 lg:gap-20">
-            <div className="md:pt-10">
+          {/* Macan / Cayenne */}
+          <div className="grid gap-16 md:grid-cols-[0.82fr_1.5fr] md:items-start md:gap-10 lg:gap-24">
+            <div className="md:pt-12">
               <ModelCard model={models[4]} />
             </div>
 
@@ -271,7 +301,7 @@ export default function Collection() {
         <motion.div
           initial={{
             opacity: 0,
-            y: 25,
+            y: 30,
           }}
           whileInView={{
             opacity: 1,
@@ -279,30 +309,31 @@ export default function Collection() {
           }}
           viewport={{
             once: true,
+            margin: "-80px",
           }}
           transition={{
-            duration: 0.9,
+            duration: 1,
             ease: [0.16, 1, 0.3, 1],
           }}
-          className="mt-32 border-t border-white/[0.08] pt-10 sm:mt-44 sm:pt-12"
+          className="mt-36 border-t border-white/[0.09] pt-10 sm:mt-48 sm:pt-14"
         >
-          <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="grid gap-12 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <p className="mb-5 text-[7px] uppercase tracking-[0.4em] text-white/25">
+              <p className="mb-6 text-[7px] uppercase tracking-[0.42em] text-white/25">
                 One marque
               </p>
 
-              <h3 className="max-w-[850px] text-[clamp(2.5rem,5vw,5.5rem)] font-light leading-[0.9] tracking-[-0.065em]">
+              <h3 className="max-w-[950px] text-[clamp(2.8rem,5.8vw,6rem)] font-light leading-[0.88] tracking-[-0.075em]">
                 Different worlds.
-                <span className="text-white/25">
+                <span className="text-white/24">
                   {" "}
                   One unmistakable Porsche DNA.
                 </span>
               </h3>
             </div>
 
-            <div className="text-right">
-              <span className="text-[7px] uppercase tracking-[0.3em] text-white/25">
+            <div className="lg:pb-1">
+              <span className="text-[7px] uppercase tracking-[0.32em] text-white/25">
                 1948 — Present
               </span>
             </div>

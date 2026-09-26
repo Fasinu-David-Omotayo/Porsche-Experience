@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Porsche3D from "@/components/Porsche3D";
+import Car3D from "@/components/Car3D";
 import ModelDesign from "@/components/ModelDesign";
+import { modelThemes } from "@/lib/modelThemes";
 
 type ModelData = {
   name: string;
@@ -11,6 +12,8 @@ type ModelData = {
   performance: string;
   power: string;
   topSpeed: string;
+  category: string;
+  image?: string;
 };
 
 const models: Record<string, ModelData> = {
@@ -18,66 +21,84 @@ const models: Record<string, ModelData> = {
     name: "911 Turbo S",
     family: "911",
     number: "01",
+    category: "Ultimate sports car",
     description:
       "A definitive expression of Porsche performance. The 911 Turbo S combines everyday usability with extraordinary acceleration, precision and unmistakable character.",
     performance: "2.5 s",
     power: "711 PS",
     topSpeed: "322 km/h",
+    modelPath: "/models/porsche_911_gt3-optimized.glb",
+    scale: 75,
   },
 
   "718": {
     name: "718 Cayman",
     family: "718",
     number: "02",
+    category: "Mid-engine sports car",
     description:
       "A mid-engine sports car engineered around balance, agility and pure driving involvement.",
     performance: "4.5 s",
     power: "300 PS",
     topSpeed: "275 km/h",
+    modelPath: "/models/718-optimized.glb",
+  scale: 75,
   },
 
   taycan: {
     name: "Taycan",
     family: "Taycan",
     number: "03",
+    category: "Electric performance",
     description:
       "Pure electric performance with the unmistakable soul of a Porsche sports car.",
     performance: "3.2 s",
     power: "435 PS",
     topSpeed: "230 km/h",
+      modelPath: "/models/taycan-optimized.glb",
+  scale: 75,
   },
 
   panamera: {
     name: "Panamera",
     family: "Panamera",
     number: "04",
+    category: "Performance luxury",
     description:
       "A performance luxury sedan combining long-distance comfort with the dynamic character of a sports car.",
     performance: "3.2 s",
     power: "550 PS",
     topSpeed: "315 km/h",
+      modelPath: "/models/panamera-optimized.glb",
+  scale: 75,
   },
 
   macan: {
     name: "Macan",
     family: "Macan",
     number: "05",
+    category: "Performance SUV",
     description:
       "A performance SUV with the driving dynamics, technology and unmistakable design language of Porsche.",
     performance: "3.3 s",
     power: "639 PS",
     topSpeed: "260 km/h",
+      modelPath: "/models/macan-optimized.glb",
+  scale: 75,
   },
 
   cayenne: {
     name: "Cayenne",
     family: "Cayenne",
     number: "06",
+    category: "Luxury performance SUV",
     description:
       "A luxury performance SUV engineered to deliver Porsche dynamics without sacrificing versatility.",
     performance: "3.3 s",
     power: "659 PS",
     topSpeed: "305 km/h",
+      modelPath: "/models/cayenne-optimized.glb",
+  scale: 75,
   },
 };
 
@@ -95,12 +116,69 @@ export async function generateMetadata({
   const car = models[model.toLowerCase()];
 
   return {
-    title: car
-      ? `${car.name} — Porsche`
-      : "Model — Porsche",
-
+    title: car ? `${car.name} — Porsche Universe` : "Model — Porsche Universe",
     description: car?.description,
   };
+}
+
+function ModelStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="border-l border-white/10 pl-4">
+      <p className="text-[7px] uppercase tracking-[0.28em] text-white/30">
+        {label}
+      </p>
+
+      <p className="mt-2 text-xl font-light tracking-[-0.03em] text-white sm:text-2xl">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function EditorialSection({
+  number,
+  eyebrow,
+  title,
+  children,
+}: {
+  number: string;
+  eyebrow: string;
+  title: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border-t border-white/[0.08] px-6 py-28 sm:px-8 sm:py-36 lg:px-12 lg:py-44">
+      <div className="mx-auto grid max-w-[1440px] gap-14 lg:grid-cols-[0.35fr_1fr] lg:gap-24">
+        <div className="flex items-start gap-4">
+          <span className="text-[8px] tracking-[0.3em] text-white/20">
+            {number}
+          </span>
+
+          <span className="mt-[3px] h-px w-8 bg-white/10" />
+
+          <span className="text-[8px] uppercase tracking-[0.3em] text-white/25">
+            {eyebrow}
+          </span>
+        </div>
+
+        <div>
+          <h2 className="max-w-[950px] text-[clamp(3rem,6.5vw,7rem)] font-light leading-[0.86] tracking-[-0.075em] text-white">
+            {title}
+          </h2>
+
+          <div className="mt-12 max-w-2xl text-[11px] leading-[2] text-white/35 sm:text-xs sm:leading-[2.05]">
+            {children}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default async function ModelPage({
@@ -109,28 +187,30 @@ export default async function ModelPage({
   const { model } = await params;
 
   const modelKey = model.toLowerCase();
-
   const car = models[modelKey];
 
-  /*
-   * INVALID MODEL
-   */
+  const theme =
+  modelThemes[
+    modelKey as keyof typeof modelThemes
+  ];
+
   if (!car) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white">
+      <main className="flex min-h-screen items-center justify-center bg-[#050505] px-6 text-white">
         <div className="text-center">
-          <p className="mb-6 text-[10px] uppercase tracking-[0.35em] text-white/40">
-            Porsche
+          <p className="mb-6 text-[8px] uppercase tracking-[0.4em] text-white/30">
+            Porsche Universe
           </p>
 
-          <h1 className="text-4xl font-light">
+          <h1 className="text-4xl font-light tracking-[-0.04em]">
             Model not found
           </h1>
 
           <Link
             href="/#models"
-            className="mt-8 inline-block border border-white/20 px-6 py-3 text-[10px] uppercase tracking-[0.2em] transition hover:bg-white hover:text-black"
+            className="mt-8 inline-flex items-center gap-4 border border-white/15 px-6 py-3 text-[8px] uppercase tracking-[0.28em] text-white/55 transition-all duration-500 hover:border-white/50 hover:bg-white hover:text-black"
           >
+            <span className="h-px w-5 bg-current" />
             Back to Collection
           </Link>
         </div>
@@ -138,325 +218,351 @@ export default async function ModelPage({
     );
   }
 
+  const is911 = modelKey === "911";
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#050505] text-white">
-
-      {/* =====================================================
+      {/* =========================================================
           NAVIGATION
-      ===================================================== */}
+      ========================================================= */}
 
-      <header className="fixed left-0 top-0 z-50 w-full">
-        <nav className="flex h-20 items-center justify-between px-6 md:px-10 lg:px-16">
-
+      <header className="fixed inset-x-0 top-0 z-[70] px-5 pt-5 sm:px-7 lg:px-10">
+        <nav className="mx-auto flex h-12 max-w-[1500px] items-center justify-between">
           <Link
             href="/"
-            className="text-lg font-semibold tracking-[0.28em]"
+            className="group flex items-center gap-3"
+            aria-label="Return to Porsche Universe"
           >
-            PORSCHE
+            <span className="flex h-9 w-9 items-center justify-center border border-white/15 text-[8px] tracking-[0.15em] transition-all duration-500 group-hover:border-white/50 group-hover:bg-white group-hover:text-black">
+              P
+            </span>
+
+            <span className="hidden text-[8px] tracking-[0.42em] text-white/60 sm:block">
+              PORSCHE
+            </span>
           </Link>
 
           <Link
             href="/#models"
-            className="group flex items-center gap-3 text-[10px] uppercase tracking-[0.25em] text-white/60 transition hover:text-white"
+            className="group flex items-center gap-3 text-[7px] uppercase tracking-[0.32em] text-white/35 transition-colors duration-300 hover:text-white"
           >
-            <span className="h-px w-6 bg-white/30 transition-all group-hover:w-10 group-hover:bg-white" />
+            <span className="h-px w-5 bg-white/20 transition-all duration-500 group-hover:w-9 group-hover:bg-white" />
 
             Collection
           </Link>
-
         </nav>
       </header>
 
-      {/* =====================================================
+      {/* =========================================================
           HERO
-      ===================================================== */}
+      ========================================================= */}
 
-      <section className="relative min-h-screen overflow-hidden bg-[#050505]">
+      <section className="relative min-h-[100svh] overflow-hidden bg-[#050505]">
+        {/* Ambient light */}
 
-        {/* Background glow */}
-        <div
-          className="
-            pointer-events-none
-            absolute
-            left-1/2
-            top-[40%]
-            h-[45vh]
-            w-[45vw]
-            -translate-x-1/2
-            -translate-y-1/2
-            rounded-full
-            bg-white/[0.025]
-            blur-[100px]
-          "
-        />
+       <div
+  className="pointer-events-none absolute left-1/2 top-[42%] z-0 h-[45vw] w-[45vw] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
+  style={{
+    background: theme.glow,
+  }}
+/>
+        <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.55)_100%)]" />
 
-        {/* -------------------------------------------------
-            MODEL IDENTIFICATION
-        ------------------------------------------------- */}
+        {/* Model identifier */}
 
-        <div className="absolute left-0 top-0 z-40 w-full px-6 pt-28 md:px-10 lg:px-16">
+        <div className="absolute left-0 top-0 z-30 w-full px-6 pt-28 sm:px-8 lg:px-12">
           <div className="flex items-center gap-4">
-
-            <span className="text-[10px] tracking-[0.3em] text-white/35">
+            <span className="text-[8px] tracking-[0.3em] text-white/25">
               {car.number}
             </span>
 
-            <span className="h-px w-12 bg-white/15" />
+            <span className="h-px w-8 bg-white/10" />
 
-            <span className="text-[10px] uppercase tracking-[0.3em] text-white/45">
+            <span className="text-[8px] uppercase tracking-[0.3em] text-white/35">
               {car.family}
             </span>
 
+            <span className="text-[8px] uppercase tracking-[0.3em] text-white/15">
+              / {car.category}
+            </span>
           </div>
         </div>
 
-        {/* =================================================
-            3D MODEL ZONE
-        ================================================= */}
+        {/* =======================================================
+                3D CAR
+            ======================================================= */}
 
-        {modelKey === "911" && (
-          <div
-            className="
-              pointer-events-none
-              absolute
-              left-0
-              right-0
-              top-[14%]
-              z-10
-              h-[55vh]
-              md:top-[11%]
-              md:h-[62vh]
-            "
-          >
-            <Porsche3D />
+                  <div className="absolute inset-x-0 top-[7%] z-10 h-[67vh] sm:top-[6%] sm:h-[72vh] lg:top-[2%] lg:h-[76vh]">
+                    <Car3D model={modelKey as any} />
+                  </div>
+
+        {/* =======================================================
+            CAR TITLE
+        ======================================================= */}
+
+        <div className="absolute bottom-[23%] left-0 z-30 w-full px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-[1500px]">
+            <p className="mb-4 text-[8px] uppercase tracking-[0.42em] text-white/30">
+              Porsche
+            </p>
+
+            <h1 className="max-w-[1200px] text-[clamp(4rem,10vw,10.5rem)] font-light leading-[0.78] tracking-[-0.085em] text-white">
+              {car.name}
+            </h1>
+
+            <p
+  className="mt-5 text-[10px] uppercase tracking-[0.4em]"
+  style={{
+    color: theme.accent,
+  }}
+>
+  {theme.headline}
+</p>
+
+<p className="mt-4 max-w-[500px] text-[11px] leading-[1.9] text-white/40">
+  {theme.subheadline}
+</p>
           </div>
-        )}
-
-        {/* =================================================
-            CAR NAME
-        ================================================= */}
-
-        <div
-          className="
-            absolute
-            bottom-[22%]
-            left-0
-            z-30
-            w-full
-            px-6
-            md:bottom-[21%]
-            md:px-10
-            lg:px-16
-          "
-        >
-
-          <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-white/35">
-            Porsche
-          </p>
-
-          <h1
-            className="
-              max-w-5xl
-              text-[clamp(3.5rem,9vw,9rem)]
-              font-light
-              leading-[0.82]
-              tracking-[-0.065em]
-            "
-          >
-            {car.name}
-          </h1>
-
         </div>
 
-        {/* =================================================
+        {/* =======================================================
             PERFORMANCE BAR
-        ================================================= */}
+        ======================================================= */}
 
-        <div
-          className="
-            absolute
-            bottom-0
-            left-0
-            z-40
-            w-full
-            border-t
-            border-white/10
-            bg-[#050505]
-            px-6
-            py-6
-            md:px-10
-            lg:px-16
-          "
-        >
-
-          <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
-
-            <p className="max-w-xl text-xs leading-6 text-white/40 md:text-sm md:leading-7">
+        <div className="absolute bottom-0 left-0 z-40 w-full border-t border-white/[0.08] bg-[#050505]/95 px-6 py-6 backdrop-blur-md sm:px-8 lg:px-12">
+          <div className="mx-auto flex max-w-[1500px] flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
+            <p className="max-w-[570px] text-[10px] leading-[1.9] text-white/35 sm:text-[11px]">
               {car.description}
             </p>
 
-            <div className="grid grid-cols-3 gap-6 md:gap-12">
+            <div className="grid grid-cols-3 gap-7 sm:gap-12">
+              <ModelStat label="0–100 km/h" value={car.performance} />
 
-              <div>
-                <p className="text-[8px] uppercase tracking-[0.22em] text-white/25">
-                  0–100 km/h
-                </p>
+              <ModelStat label="Power" value={car.power} />
 
-                <p className="mt-2 text-lg font-light md:text-xl">
-                  {car.performance}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[8px] uppercase tracking-[0.22em] text-white/25">
-                  Power
-                </p>
-
-                <p className="mt-2 text-lg font-light md:text-xl">
-                  {car.power}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[8px] uppercase tracking-[0.22em] text-white/25">
-                  Top speed
-                </p>
-
-                <p className="mt-2 text-lg font-light md:text-xl">
-                  {car.topSpeed}
-                </p>
-              </div>
-
+              <ModelStat label="Top speed" value={car.topSpeed} />
             </div>
-
           </div>
-
         </div>
 
         {/* Scroll indicator */}
 
-        <div className="absolute bottom-32 left-1/2 z-40 hidden -translate-x-1/2 flex-col items-center gap-3 md:flex">
-
-          <span className="text-[8px] uppercase tracking-[0.3em] text-white/25">
-            Scroll
+        <div className="absolute bottom-[14%] left-1/2 z-30 hidden -translate-x-1/2 flex-col items-center gap-3 md:flex">
+          <span className="text-[7px] uppercase tracking-[0.4em] text-white/20">
+            Explore
           </span>
 
-          <div className="h-8 w-px bg-white/20" />
-
+          <span className="h-10 w-px bg-gradient-to-b from-white/30 to-transparent" />
         </div>
-
       </section>
 
-      {/* =====================================================
-          DESIGN PHILOSOPHY
-      ===================================================== */}
+      {/* =========================================================
+          911 DESIGN
+      ========================================================= */}
 
-      {modelKey === "911" && <ModelDesign />}
+      {is911 && <ModelDesign />}
 
-      {/* =====================================================
-          EXPERIENCE
-      ===================================================== */}
+      {/* =========================================================
+          PHILOSOPHY
+      ========================================================= */}
 
-      <section className="border-t border-white/10 px-6 py-32 md:px-10 lg:px-16">
+      <EditorialSection
+        number="02"
+        eyebrow="Philosophy"
+        title={
+          <>
+            Form follows
+            <br />
+            <span className="text-white/25">function.</span>
+          </>
+        }
+      >
+        <p>
+          Porsche design is not decoration. Every surface, proportion and
+          opening has a purpose. The silhouette is shaped by performance,
+          airflow and the relationship between the driver and the road.
+        </p>
 
-        <div className="mx-auto max-w-7xl">
+        <p className="mt-8">
+          The result is a design language that can evolve without losing its
+          identity. Different generations, different technologies, one
+          unmistakable character.
+        </p>
+      </EditorialSection>
 
-          <div className="grid gap-16 md:grid-cols-[0.7fr_1.3fr]">
+      {/* =========================================================
+          PERFORMANCE
+      ========================================================= */}
 
+      <section className="border-t border-white/[0.08] bg-[#08090a] px-6 py-28 sm:px-8 sm:py-36 lg:px-12 lg:py-44">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="grid gap-16 lg:grid-cols-[0.45fr_1fr] lg:gap-24">
             <div>
-
-              <p className="text-[10px] uppercase tracking-[0.3em] text-white/30">
-                The experience
+              <p className="text-[8px] uppercase tracking-[0.4em] text-white/25">
+                Performance
               </p>
 
-              <h2 className="mt-6 max-w-md text-4xl font-light leading-tight tracking-[-0.03em] md:text-6xl">
-                Designed around
-                the driver.
-              </h2>
-
+              <p className="mt-6 text-[clamp(3rem,6vw,6rem)] font-light leading-[0.82] tracking-[-0.07em]">
+                Numbers
+                <br />
+                <span className="text-white/22">become feeling.</span>
+              </p>
             </div>
 
-            <div className="max-w-2xl">
+            <div className="grid border-t border-white/[0.08] sm:grid-cols-3">
+              <div className="border-b border-white/[0.08] py-8 sm:border-b-0 sm:border-r sm:pr-8">
+                <p className="text-[7px] uppercase tracking-[0.3em] text-white/25">
+                  Acceleration
+                </p>
 
-              <p className="text-base leading-8 text-white/50 md:text-lg">
-                Every Porsche is shaped by the relationship between
-                performance, engineering and the person behind the
-                wheel. This experience brings those details closer,
-                from the proportions of the body to the technology
-                beneath it.
-              </p>
+                <p className="mt-6 text-[clamp(2.5rem,5vw,5rem)] font-light leading-none tracking-[-0.07em]">
+                  {car.performance}
+                </p>
 
-              <div className="mt-16 grid grid-cols-2 border-t border-white/10">
-
-                <div className="border-r border-white/10 py-8 pr-8">
-
-                  <p className="text-[9px] uppercase tracking-[0.25em] text-white/30">
-                    Architecture
-                  </p>
-
-                  <p className="mt-3 text-sm text-white/60">
-                    Performance engineering
-                  </p>
-
-                </div>
-
-                <div className="py-8 pl-8">
-
-                  <p className="text-[9px] uppercase tracking-[0.25em] text-white/30">
-                    Philosophy
-                  </p>
-
-                  <p className="mt-3 text-sm text-white/60">
-                    Form follows function
-                  </p>
-
-                </div>
-
+                <p className="mt-4 text-[9px] text-white/25">
+                  0–100 km/h
+                </p>
               </div>
 
+              <div className="border-b border-white/[0.08] py-8 sm:border-b-0 sm:border-r sm:px-8">
+                <p className="text-[7px] uppercase tracking-[0.3em] text-white/25">
+                  Power
+                </p>
+
+                <p className="mt-6 text-[clamp(2.5rem,5vw,5rem)] font-light leading-none tracking-[-0.07em]">
+                  {car.power}
+                </p>
+
+                <p className="mt-4 text-[9px] text-white/25">
+                  Maximum output
+                </p>
+              </div>
+
+              <div className="py-8 sm:pl-8">
+                <p className="text-[7px] uppercase tracking-[0.3em] text-white/25">
+                  Velocity
+                </p>
+
+                <p className="mt-6 text-[clamp(2.5rem,5vw,5rem)] font-light leading-none tracking-[-0.07em]">
+                  {car.topSpeed}
+                </p>
+
+                <p className="mt-4 text-[9px] text-white/25">
+                  Maximum speed
+                </p>
+              </div>
             </div>
-
           </div>
-
         </div>
-
       </section>
 
-      {/* =====================================================
-          COLLECTION CTA
-      ===================================================== */}
+      {/* =========================================================
+          EXPERIENCE
+      ========================================================= */}
 
-      <section className="border-t border-white/10 px-6 py-24 md:px-10 lg:px-16">
+      <EditorialSection
+        number="03"
+        eyebrow="The experience"
+        title={
+          <>
+            Designed around
+            <br />
+            <span className="text-white/25">the driver.</span>
+          </>
+        }
+      >
+        <p>
+          Every Porsche is shaped around a simple idea: performance should not
+          exist separately from the person experiencing it.
+        </p>
 
-        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <p className="mt-8">
+          Steering, braking, acceleration, balance and sound all become part of
+          one continuous interaction between machine and driver.
+        </p>
 
-          <div>
-
-            <p className="text-[10px] uppercase tracking-[0.3em] text-white/30">
-              Porsche Collection
+        <div className="mt-12 grid border-t border-white/[0.08] sm:grid-cols-2">
+          <div className="border-b border-white/[0.08] py-7 sm:border-b-0 sm:border-r sm:pr-8">
+            <p className="text-[7px] uppercase tracking-[0.3em] text-white/25">
+              Architecture
             </p>
 
-            <h2 className="mt-4 text-3xl font-light md:text-5xl">
-              Discover another model.
-            </h2>
-
+            <p className="mt-3 text-[10px] text-white/55">
+              Performance engineering
+            </p>
           </div>
 
-          <Link
-            href="/#models"
-            className="group flex w-fit items-center gap-5 text-[10px] uppercase tracking-[0.25em] text-white/60 transition hover:text-white"
-          >
+          <div className="py-7 sm:pl-8">
+            <p className="text-[7px] uppercase tracking-[0.3em] text-white/25">
+              Philosophy
+            </p>
 
-            <span className="h-px w-8 bg-white/30 transition-all group-hover:w-14 group-hover:bg-white" />
-
-            View collection
-
-          </Link>
-
+            <p className="mt-3 text-[10px] text-white/55">
+              Form follows function
+            </p>
+          </div>
         </div>
+      </EditorialSection>
 
+      {/* =========================================================
+          FINAL STATEMENT
+      ========================================================= */}
+
+      <section className="relative overflow-hidden border-t border-white/[0.08] px-6 py-32 sm:px-8 sm:py-40 lg:px-12 lg:py-52">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,255,255,0.025),transparent_45%)]" />
+
+        <div className="relative mx-auto max-w-[1440px]">
+          <p className="text-[8px] uppercase tracking-[0.4em] text-white/20">
+            Porsche Universe
+          </p>
+
+          <h2 className="mt-10 max-w-[1150px] text-[clamp(3.5rem,8vw,9rem)] font-light leading-[0.8] tracking-[-0.085em]">
+            Different worlds.
+            <br />
+            <span className="text-white/22">One DNA.</span>
+          </h2>
+
+          <div className="mt-14 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <p className="max-w-[400px] text-[10px] leading-[1.9] text-white/30">
+              Discover the wider Porsche collection and find the machine that
+              speaks to you.
+            </p>
+
+            <Link
+              href="/#models"
+              className="group flex w-fit items-center gap-4 text-[8px] uppercase tracking-[0.32em] text-white/45 transition-colors duration-300 hover:text-white"
+            >
+              <span className="h-px w-7 bg-white/20 transition-all duration-500 group-hover:w-12 group-hover:bg-white" />
+
+              View collection
+            </Link>
+          </div>
+        </div>
       </section>
 
+      {/* =========================================================
+          FOOTER
+      ========================================================= */}
+
+      <footer className="border-t border-white/[0.08] bg-[#030404] px-6 py-12 sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[7px] uppercase tracking-[0.35em] text-white/15">
+            Porsche Universe
+          </p>
+
+          <div className="flex items-center gap-4">
+            <span className="text-[7px] uppercase tracking-[0.3em] text-white/15">
+              {car.family}
+            </span>
+
+            <span className="h-px w-5 bg-white/10" />
+
+            <span className="text-[7px] uppercase tracking-[0.3em] text-white/15">
+              Stuttgart
+            </span>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
