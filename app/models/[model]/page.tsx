@@ -129,7 +129,7 @@ function ModelStat({
   value: string;
 }) {
   return (
-    <div className="border-l border-white/10 pl-4">
+    <div className="border-l border-white/10 pl-4 min-w-0">
       <p className="text-[7px] uppercase tracking-[0.28em] text-white/30">
         {label}
       </p>
@@ -233,15 +233,14 @@ export default async function ModelPage({
             className="group flex items-center gap-3"
             aria-label="Return to Porsche Universe"
           >
-            <span className="flex h-9 w-9 items-center justify-center border border-white/15 text-[8px] tracking-[0.15em] transition-all duration-500 group-hover:border-white/50 group-hover:bg-white group-hover:text-black">
-              P
+            <span className="flex h-9 w-9 items-center justify-center ">
+              <img src="/images/porsche-crest.svg" alt="" />
             </span>
 
             <span className="hidden text-[8px] tracking-[0.42em] text-white/60 sm:block">
               PORSCHE
             </span>
           </Link>
-
           <Link
             href="/#models"
             className="group flex items-center gap-3 text-[7px] uppercase tracking-[0.32em] text-white/35 transition-colors duration-300 hover:text-white"
@@ -257,11 +256,11 @@ export default async function ModelPage({
           HERO
       ========================================================= */}
 
-      <section className="relative min-h-[100svh] overflow-hidden bg-[#050505]">
+      <section className="relative min-h-screen overflow-hidden bg-[#050505]">
         {/* Ambient light */}
 
        <div
-  className="pointer-events-none absolute left-1/2 top-[42%] z-0 h-[45vw] w-[45vw] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
+  className="pointer-events-none absolute left-1/2 top-[42%] z-0 h-[90vw] w-[90vw] max-h-[800px] max-w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
   style={{
     background: theme.glow,
   }}
@@ -270,7 +269,7 @@ export default async function ModelPage({
 
         {/* Model identifier */}
 
-        <div className="absolute left-0 top-0 z-30 w-full px-6 pt-28 sm:px-8 lg:px-12">
+        <div className="absolute left-0 top-0 z-30 w-full px-5 pt-24 sm:px-8 sm:pt-28 lg:px-12">
           <div className="flex items-center gap-4">
             <span className="text-[8px] tracking-[0.3em] text-white/25">
               {car.number}
@@ -292,7 +291,30 @@ export default async function ModelPage({
                 3D CAR
             ======================================================= */}
 
-                  <div className="absolute inset-x-0 top-[7%] z-10 h-[67vh] sm:top-[6%] sm:h-[72vh] lg:top-[2%] lg:h-[76vh]">
+                  <div
+  className="
+    absolute
+    inset-x-0
+    z-10
+    top-[14%]
+    h-[38vh]
+
+    xs:h-[42vh]
+
+    sm:top-[12%]
+    sm:h-[48vh]
+
+    md:top-[10%]
+    md:h-[54vh]
+
+    lg:top-[6%]
+    lg:h-[62vh]
+
+    xl:h-[70vh]
+
+    2xl:h-[76vh]
+  "
+>
                     <Car3D model={modelKey as any} />
                   </div>
 
@@ -300,13 +322,41 @@ export default async function ModelPage({
             CAR TITLE
         ======================================================= */}
 
-        <div className="absolute bottom-[23%] left-0 z-30 w-full px-6 sm:px-8 lg:px-12">
+        <div
+  className="
+    absolute
+    left-0
+    z-30
+    w-full
+
+    bottom-[18%]
+
+    sm:bottom-[20%]
+
+    md:bottom-[22%]
+
+    lg:bottom-[23%]
+
+    px-5
+    sm:px-8
+    lg:px-12
+  "
+>
           <div className="mx-auto max-w-[1500px]">
             <p className="mb-4 text-[8px] uppercase tracking-[0.42em] text-white/30">
               Porsche
             </p>
 
-            <h1 className="max-w-[1200px] text-[clamp(4rem,10vw,10.5rem)] font-light leading-[0.78] tracking-[-0.085em] text-white">
+            <h1
+  className="
+    max-w-[1200px]
+    text-[clamp(2.6rem,10vw,10.5rem)]
+    font-light
+    leading-[0.82]
+    tracking-[-0.08em]
+    text-white
+  "
+>
               {car.name}
             </h1>
 
@@ -319,7 +369,7 @@ export default async function ModelPage({
   {theme.headline}
 </p>
 
-<p className="mt-4 max-w-[500px] text-[11px] leading-[1.9] text-white/40">
+<p className="mt-4 max-w-[580px] text-[11px] leading-[1.9] text-white/40 sm:text-xs">
   {theme.subheadline}
 </p>
           </div>
@@ -329,13 +379,13 @@ export default async function ModelPage({
             PERFORMANCE BAR
         ======================================================= */}
 
-        <div className="absolute bottom-0 left-0 z-40 w-full border-t border-white/[0.08] bg-[#050505]/95 px-6 py-6 backdrop-blur-md sm:px-8 lg:px-12">
+        <div className="absolute bottom-0 left-0 z-40 w-full border-t border-white/[0.08] bg-[#050505]/95 px-5 py-5 backdrop-blur-md sm:px-8 sm:py-6 lg:px-12">
           <div className="mx-auto flex max-w-[1500px] flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
             <p className="max-w-[570px] text-[10px] leading-[1.9] text-white/35 sm:text-[11px]">
               {car.description}
             </p>
 
-            <div className="grid grid-cols-3 gap-7 sm:gap-12">
+            <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-10 lg:w-auto">
               <ModelStat label="0–100 km/h" value={car.performance} />
 
               <ModelStat label="Power" value={car.power} />
@@ -396,7 +446,7 @@ export default async function ModelPage({
 
       <section className="border-t border-white/[0.08] bg-[#08090a] px-6 py-28 sm:px-8 sm:py-36 lg:px-12 lg:py-44">
         <div className="mx-auto max-w-[1440px]">
-          <div className="grid gap-16 lg:grid-cols-[0.45fr_1fr] lg:gap-24">
+          <div className="grid gap-12 lg:grid-cols-[0.45fr_1fr] lg:gap-24">
             <div>
               <p className="text-[8px] uppercase tracking-[0.4em] text-white/25">
                 Performance
@@ -522,7 +572,7 @@ export default async function ModelPage({
             <span className="text-white/22">One DNA.</span>
           </h2>
 
-          <div className="mt-14 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-14 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
             <p className="max-w-[400px] text-[10px] leading-[1.9] text-white/30">
               Discover the wider Porsche collection and find the machine that
               speaks to you.
