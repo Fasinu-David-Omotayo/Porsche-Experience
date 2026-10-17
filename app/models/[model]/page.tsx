@@ -14,6 +14,8 @@ type ModelData = {
   topSpeed: string;
   category: string;
   image?: string;
+  modelPath: string;
+  scale: number;
 };
 
 const models: Record<string, ModelData> = {
