@@ -45,7 +45,7 @@ const models: PorscheModel[] = [
     family: "Luxury Performance",
     description:
       "Long-distance comfort, unmistakable design and sports-car performance.",
-    image: "/images/optimized/cars/panamera.webp",
+    image: "/images/optimized/cars/Panamera.webp",
   },
   {
     number: "05",
@@ -61,7 +61,7 @@ const models: PorscheModel[] = [
     family: "Luxury SUV",
     description:
       "Performance and capability brought together in a distinctive SUV.",
-    image: "/images/optimized/cars/cayenne.webp",
+    image: "/images/optimized/cars/Cayenne.webp",
   },
 ];
 
